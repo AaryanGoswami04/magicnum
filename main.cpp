@@ -95,7 +95,7 @@ int main() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaprekar Range Calculator</title>
+    <title>Magic number calculator</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: system-ui, sans-serif; background: #f4f4f9; padding: 20px; margin: 0; display: flex; justify-content: center; }
@@ -112,14 +112,12 @@ int main() {
 </head>
 <body>
     <main class="container">
-        <h1>Kaprekar Range Calculator</h1>
-        <p>Show the digit-sorting subtraction routine for each number in an inclusive range. If the range contains more than 50 numbers, only the first 50 are shown. Leading zeros in the inputs are ignored; each routine keeps its starting number's digit width.</p>
+        <h1>Magic number calculator</h1>
         <form id="rangeForm">
             <label for="start">Start</label>
             <input type="text" inputmode="numeric" pattern="[0-9]{1,18}" maxlength="18" id="start" placeholder="e.g. 100" required>
             <label for="end">End</label>
             <input type="text" inputmode="numeric" pattern="[0-9]{1,18}" maxlength="18" id="end" placeholder="e.g. 110" required>
-            <p>Enter non-negative whole numbers with at most 18 digits. Start must be less than or equal to End.</p>
             <button type="submit" id="calculateButton">Calculate</button>
         </form>
         <pre id="output" role="status" aria-live="polite">Output will appear here...</pre>
