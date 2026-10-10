@@ -3,12 +3,13 @@
 #include <algorithm>
 #include <vector>
 #include <exception>
+#include <cctype>
 #include "httplib.h"
 
 using namespace std;
 #define ll long long
 
-string padZeros(ll num, int len) {
+string padZeros(ll num, size_t len) {
     string s = to_string(num);
     if (s.length() < len) {
         s.insert(0, len - s.length(), '0');
@@ -18,7 +19,7 @@ string padZeros(ll num, int len) {
 
 string runKaprekar(string input_str) {
     try {
-        int len = input_str.length();
+        size_t len = input_str.length();
         string dec_str = input_str;
         sort(dec_str.begin(), dec_str.end(), greater<char>());
         
@@ -66,63 +67,30 @@ string runKaprekar(string input_str) {
     }
 }
 
+// Keep every sorted digit arrangement safely within signed 64-bit range.
+const ll kMaxInput = 999999999999999999LL;
+const ll kMaxResults = 50;
+
+bool parseNumber(const string &text, ll &number) {
+    if (text.empty() || text.size() > 18 ||
+        !all_of(text.begin(), text.end(), [](unsigned char c) {
+            return isdigit(c);
+        })) {
+        return false;
+    }
+    try {
+        number = stoll(text);
+        return number <= kMaxInput;
+    } catch (...) {
+        return false;
+    }
+}
+
 int main() {
     httplib::Server svr;
 
-    // Serve the User Interface
     svr.Get("/", [](const httplib::Request &, httplib::Response &res) {
-        std::string html_content = R"HTML(<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Calculator</title>
-            <style>
-                body { font-family: system-ui, sans-serif; background: #f4f4f9; padding: 20px; display: flex; justify-content: center; }
-                .container { background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-                input { width: 100%; box-sizing: border-box; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; }
-                button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; margin-bottom: 15px; }
-                button:hover { background: #0056b3; }
-                pre { background: #282c34; color: #abb2bf; padding: 15px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; margin-bottom: 0;}
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <input type="number" id="inputNum" placeholder="Enter a number">
-                <button onclick="calculate()">Calculate</button>
-                <pre id="output">Output will appear here...</pre>
-            </div>
-            <script>
-                async function calculate() {
-                    const input = document.getElementById('inputNum').value;
-                    if (!input) return;
-                    document.getElementById('output').textContent = "Calculating...";
-                    try {
-                        const response = await fetch(`/api/kaprekar?num=${input}`);
-                        const result = await response.text();
-                        document.getElementById('output').textContent = result;
-                    } catch (err) {
-                        document.getElementById('output').textContent = "Network error occurred.";
-                    }
-                }
-            </script>
-        </body>
-        </html>)HTML";
-        
-        res.set_content(html_content, "text/html");
-    });
-
-    // Serve the Computation Logic
-    svr.Get("/api/kaprekar", [](const httplib::Request &req, httplib::Response &res) {
-        if (req.has_param("num")) {
-            std::string num = req.get_param_value("num");
-            res.set_content(runKaprekar(num), "text/plain");
-        } else {
-            res.set_content("Error: No number provided", "text/plain");
-        }
-    });
-
-    std::cout << "Server starting on port 8080...\n";
-    svr.listen("0.0.0.0", 8080);
-    return 0;
-}
+        const string html = R"HTML(<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
